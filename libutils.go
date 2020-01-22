@@ -5,16 +5,26 @@ import (
 	"os/signal"
 	"io/ioutil"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"encoding/json"
 )
 
 var (
-	PathFile string
+	PathFile = os.Args[0]
 )
 
 func RealPath(name string) string {
 	return filepath.Dir(PathFile) + "/" + name
+}
+
+func Atoi(s string) int {
+	value, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return value
 }
 
 func JsonReadWrite(filename string, v interface{}, vd interface{}) {
