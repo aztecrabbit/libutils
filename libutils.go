@@ -30,7 +30,7 @@ func JsonReadWrite(filename string, v interface{}, vd interface{}) {
 }
 
 func JsonWrite(v interface{}, filename string) {
-	bytedata, _ := json.MarshalIndent(v, "", "    ")
+	bytedata, _ := json.MarshalIndent(v, "", "	")
 
 	ioutil.WriteFile(filename, bytedata, 0644)
 }
