@@ -9,13 +9,16 @@ import (
 	"fmt"
 	"path/filepath"
 	"sync"
+	"bufio"
 	"strconv"
 	"syscall"
+	"strings"
 	"encoding/json"
 )
 
 var (
 	Lock = sync.RWMutex{}
+	Stdin = bufio.NewReader(os.Stdin)
 	PathFile = os.Args[0]
 )
 
@@ -27,6 +30,22 @@ func Atoi(s string) int {
 	}
 
 	return value
+}
+
+func PaddingLeft(value string, s string, count int) string {
+	s = strings.Repeat(s, count)
+	if len(value) >= len(s) {
+		return value
+	}
+
+	return s[:len(s) - len(value)] + value
+}
+
+func Input(s string) string {
+	fmt.Printf(s)
+	value, _ := Stdin.ReadString('\n')
+
+	return strings.TrimSuffix(value, "\n")
 }
 
 func RealPath(name string) string {
@@ -120,18 +139,26 @@ func JsonReadWrite(filename string, v interface{}, vd interface{}) {
 //
 
 type InterruptHandler struct {
+	Done chan bool
 	Handle func()
 }
 
 func (i *InterruptHandler) Start() {
-    channel := make(chan os.Signal, 2)
-    signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
+    i.Done = make(chan bool)
+
+    ch := make(chan os.Signal, 2)
+    signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 
     go func () {
-    	<- channel
+    	<- ch
     	if i.Handle != nil {
     		i.Handle()
 	    }
-    	os.Exit(1)
+	    i.Done <- true
     }()
+}
+
+func (i *InterruptHandler) Wait() {
+	<- i.Done
+   	os.Exit(1)
 }
