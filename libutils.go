@@ -160,5 +160,5 @@ func (i *InterruptHandler) Start() {
 
 func (i *InterruptHandler) Wait() {
 	<- i.Done
-   	os.Exit(1)
+	os.Exit(0)
 }
