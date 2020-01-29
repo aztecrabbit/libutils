@@ -144,18 +144,18 @@ type InterruptHandler struct {
 }
 
 func (i *InterruptHandler) Start() {
-    i.Done = make(chan bool)
+	i.Done = make(chan bool)
 
-    ch := make(chan os.Signal, 2)
-    signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	ch := make(chan os.Signal, 2)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 
-    go func () {
-    	<- ch
-    	if i.Handle != nil {
-    		i.Handle()
-	    }
-	    i.Done <- true
-    }()
+	go func () {
+		<- ch
+		if i.Handle != nil {
+			i.Handle()
+		}
+		i.Done <- true
+	}()
 }
 
 func (i *InterruptHandler) Wait() {
