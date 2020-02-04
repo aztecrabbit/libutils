@@ -19,12 +19,11 @@ import (
 var (
 	Lock = sync.RWMutex{}
 	Stdin = bufio.NewReader(os.Stdin)
-	PathFile = os.Args[0]
+	PathFile, _ = os.Executable()
 )
 
 func Atoi(s string) int {
 	value, err := strconv.Atoi(s)
-
 	if err != nil {
 		panic(err)
 	}
@@ -49,9 +48,7 @@ func Input(s string) string {
 }
 
 func RealPath(name string) string {
-	realpath, _ := filepath.Abs(filepath.Dir(PathFile) + "/" + name)
-
-	return realpath
+	return filepath.Dir(PathFile) + "/" + name
 }
 
 func BytesToSize(value float64) string {
@@ -97,14 +94,14 @@ func MakeDir(fullpath string) {
 	os.MkdirAll(fullpath, 0700)
 }
 
-func CopyFile(source string, destination string, mode int) {
+func CopyFile(source string, destination string) {
 	from, err := os.Open(source)
 	if err != nil {
 		panic(err)
 	}
 	defer from.Close()
 
-	to, err := os.OpenFile(destination, os.O_RDWR|os.O_CREATE, os.FileMode(mode))
+	to, err := os.OpenFile(destination, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
