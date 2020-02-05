@@ -102,6 +102,8 @@ func CopyFile(source string, destination string) {
 	}
 	defer from.Close()
 
+	MakeDir(filepath.Dir(destination))
+
 	to, err := os.OpenFile(destination, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
