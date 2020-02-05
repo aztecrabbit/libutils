@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"syscall"
 	"strings"
+	"runtime"
 	"encoding/json"
 )
 
@@ -131,6 +132,15 @@ func JsonReadWrite(filename string, v interface{}, vd interface{}) {
 	bytedata, _ := ioutil.ReadAll(r)
 
 	json.Unmarshal(bytedata, v)
+}
+
+func KillProcess(p *os.Process) {
+	switch runtime.GOOS {
+		case "windows":
+			p.Kill()
+		default:
+			p.Signal(syscall.SIGTERM)
+	}
 }
 
 //
