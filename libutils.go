@@ -41,6 +41,15 @@ func PaddingLeft(value string, s string, count int) string {
 	return s[:len(s) - len(value)] + value
 }
 
+func PaddingRight(value string, s string, count int) string {
+	s = strings.Repeat(s, count)
+	if len(value) >= len(s) {
+		return value
+	}
+
+	return value + s[:len(s) - len(value)]
+}
+
 func Input(s string) string {
 	fmt.Printf(s)
 	value, _ := Stdin.ReadString('\n')
@@ -137,11 +146,16 @@ func JsonReadWrite(filename string, v interface{}, vd interface{}) {
 }
 
 func KillProcess(p *os.Process) {
+	if p == nil {
+		return
+	}
+
 	switch runtime.GOOS {
 		case "windows":
 			p.Kill()
 		default:
-			p.Signal(syscall.SIGTERM)
+			// p.Signal(syscall.SIGTERM)
+			p.Signal(os.Interrupt)
 	}
 }
 
