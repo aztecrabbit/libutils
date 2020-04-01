@@ -23,6 +23,19 @@ var (
 	PathFile, _ = os.Executable()
 )
 
+func ClearScreen() {
+	switch runtime.GOOS {
+	case "linux":
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	case "windows":
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
+}
+
 func Atoi(s string) int {
 	value, err := strconv.Atoi(s)
 	if err != nil {
