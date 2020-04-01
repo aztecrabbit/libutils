@@ -25,7 +25,7 @@ var (
 
 func ClearScreen() {
 	switch runtime.GOOS {
-	case "linux":
+	case "linux", "android":
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
 		cmd.Run()
