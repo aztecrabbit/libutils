@@ -1,25 +1,25 @@
 package libutils
 
 import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
-	"io"
-	"io/ioutil"
-	"fmt"
 	"path/filepath"
-	"sync"
-	"bufio"
-	"strconv"
-	"syscall"
-	"strings"
 	"runtime"
-	"encoding/json"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
 )
 
 var (
-	Lock = sync.RWMutex{}
-	Stdin = bufio.NewReader(os.Stdin)
+	Lock        = sync.RWMutex{}
+	Stdin       = bufio.NewReader(os.Stdin)
 	PathFile, _ = os.Executable()
 )
 
@@ -51,7 +51,7 @@ func PaddingLeft(value string, s string, count int) string {
 		return value
 	}
 
-	return s[:len(s) - len(value)] + value
+	return s[:len(s)-len(value)] + value
 }
 
 func PaddingRight(value string, s string, count int) string {
@@ -60,7 +60,7 @@ func PaddingRight(value string, s string, count int) string {
 		return value
 	}
 
-	return value + s[:len(s) - len(value)]
+	return value + s[:len(s)-len(value)]
 }
 
 func Input(s string) string {
@@ -74,6 +74,24 @@ func RealPath(name string) string {
 	return filepath.Dir(PathFile) + "/" + name
 }
 
+func GetConfigPath(name string, filename string) string {
+	var filepath string
+
+	if runtime.GOOS == "linux" {
+		var home string
+		if os.Geteuid() == 0 {
+			home = "/home/" + os.Getenv("SUDO_USER")
+		} else {
+			home = os.Getenv("HOME")
+		}
+		filepath = home + "/.config/" + name + "/" + filename
+	} else {
+		filepath = RealPath(filename)
+	}
+
+	return filepath
+}
+
 func BytesToSize(value float64) string {
 	suffixes := []string{
 		"B",
@@ -84,7 +102,7 @@ func BytesToSize(value float64) string {
 
 	var i int
 
-	for value >= 1024 && i < (len(suffixes) - 1) {
+	for value >= 1024 && i < (len(suffixes)-1) {
 		value = value / 1024
 		i++
 	}
@@ -164,18 +182,19 @@ func KillProcess(p *os.Process) {
 	}
 
 	switch runtime.GOOS {
-		case "windows":
-			p.Kill()
-		default:
-			// p.Signal(syscall.SIGTERM)
-			p.Signal(os.Interrupt)
+	case "windows":
+		p.Kill()
+	default:
+		// p.Signal(syscall.SIGTERM)
+		// p.Signal(os.Interrupt)
+		p.Signal(os.Kill)
 	}
 }
 
 //
 
 type InterruptHandler struct {
-	Done chan bool
+	Done   chan bool
 	Handle func()
 }
 
@@ -185,8 +204,8 @@ func (i *InterruptHandler) Start() {
 	ch := make(chan os.Signal, 2)
 	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 
-	go func () {
-		<- ch
+	go func() {
+		<-ch
 		if i.Handle != nil {
 			i.Handle()
 		}
@@ -195,6 +214,6 @@ func (i *InterruptHandler) Start() {
 }
 
 func (i *InterruptHandler) Wait() {
-	<- i.Done
+	<-i.Done
 	os.Exit(0)
 }
