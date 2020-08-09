@@ -79,8 +79,9 @@ func GetConfigPath(name string, filename string) string {
 
 	if runtime.GOOS == "linux" {
 		var home string
-		if os.Geteuid() == 0 {
-			home = "/home/" + os.Getenv("SUDO_USER")
+		var user string = os.Getenv("SUDO_USER")
+		if os.Geteuid() == 0 && user != "" {
+			home = "/home/" + user
 		} else {
 			home = os.Getenv("HOME")
 		}
